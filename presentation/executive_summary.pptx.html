@@ -1,0 +1,711 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>AI Trading System - Executive Summary</title>
+<style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            color: #ffffff;
+            line-height: 1.6;
+        }
+        
+        .ppt-slide {
+            width: 1280px;
+            height: 720px;
+            margin: 0 auto 40px;
+            padding: 60px;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            position: relative;
+            overflow: hidden;
+            page-break-after: always;
+        }
+        
+        .ppt-slide::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, #e94560, #ff6b6b, #feca57);
+        }
+        
+        .title-slide {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+        }
+        
+        .title-slide h1 {
+            font-size: 72px;
+            font-weight: 800;
+            margin-bottom: 30px;
+            background: linear-gradient(135deg, #e94560, #ff6b6b);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .title-slide .subtitle {
+            font-size: 32px;
+            font-weight: 300;
+            color: #a0a0a0;
+            margin-bottom: 60px;
+        }
+        
+        .title-slide .meta {
+            font-size: 20px;
+            color: #888;
+        }
+        
+        h2 {
+            font-size: 48px;
+            font-weight: 700;
+            margin-bottom: 40px;
+            color: #e94560;
+        }
+        
+        h3 {
+            font-size: 28px;
+            font-weight: 600;
+            margin-bottom: 20px;
+            color: #feca57;
+        }
+        
+        p, li {
+            font-size: 22px;
+            line-height: 1.8;
+            color: #e0e0e0;
+        }
+        
+        ul {
+            list-style: none;
+            padding-left: 0;
+        }
+        
+        ul li {
+            padding-left: 40px;
+            position: relative;
+            margin-bottom: 16px;
+        }
+        
+        ul li::before {
+            content: '▸';
+            position: absolute;
+            left: 0;
+            color: #e94560;
+            font-size: 24px;
+        }
+        
+        .two-column {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 50px;
+            margin-top: 30px;
+        }
+        
+        .highlight-box {
+            background: rgba(233, 69, 96, 0.15);
+            border-left: 4px solid #e94560;
+            padding: 25px;
+            margin: 25px 0;
+            border-radius: 0 8px 8px 0;
+        }
+        
+        .metric-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 30px;
+            margin-top: 40px;
+        }
+        
+        .metric-card {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 30px;
+            border-radius: 12px;
+            text-align: center;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .metric-value {
+            font-size: 48px;
+            font-weight: 800;
+            color: #feca57;
+            margin-bottom: 10px;
+        }
+        
+        .metric-label {
+            font-size: 18px;
+            color: #a0a0a0;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        .architecture-diagram {
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 12px;
+            padding: 30px;
+            margin-top: 30px;
+        }
+        
+        .layer {
+            display: flex;
+            justify-content: space-around;
+            margin-bottom: 20px;
+            padding: 15px;
+            border-radius: 8px;
+        }
+        
+        .layer-data { background: rgba(52, 152, 219, 0.2); }
+        .layer-ingestion { background: rgba(155, 89, 182, 0.2); }
+        .layer-feature { background: rgba(231, 76, 60, 0.2); }
+        .layer-signal { background: rgba(243, 156, 18, 0.2); }
+        .layer-risk { background: rgba(230, 126, 34, 0.2); }
+        .layer-execution { background: rgba(39, 174, 96, 0.2); }
+        
+        .component {
+            padding: 12px 20px;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 500;
+            text-align: center;
+        }
+        
+        .footer {
+            position: absolute;
+            bottom: 30px;
+            left: 60px;
+            right: 60px;
+            display: flex;
+            justify-content: space-between;
+            font-size: 14px;
+            color: #666;
+        }
+        
+        .risk-matrix {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 30px;
+            margin-top: 30px;
+        }
+        
+        .risk-item {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 25px;
+            border-radius: 10px;
+            border-left: 4px solid #e94560;
+        }
+        
+        .risk-item h4 {
+            font-size: 20px;
+            color: #feca57;
+            margin-bottom: 10px;
+        }
+        
+        .roadmap {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 40px;
+        }
+        
+        .roadmap-phase {
+            flex: 1;
+            text-align: center;
+            padding: 20px;
+            position: relative;
+        }
+        
+        .roadmap-phase::after {
+            content: '→';
+            position: absolute;
+            right: -20px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 30px;
+            color: #e94560;
+        }
+        
+        .roadmap-phase:last-child::after {
+            display: none;
+        }
+        
+        .phase-number {
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, #e94560, #ff6b6b);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            font-weight: 700;
+            margin: 0 auto 15px;
+        }
+        
+        .phase-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #feca57;
+            margin-bottom: 10px;
+        }
+        
+        .phase-desc {
+            font-size: 14px;
+            color: #a0a0a0;
+        }
+    </style>
+</head>
+<body>
+<!-- Slide 1: Title -->
+<div class="ppt-slide title-slide">
+<h1>AI Trading System</h1>
+<p class="subtitle">Research &amp; Edge Detection Platform</p>
+<p class="meta">Technical Implementation Guide<br/>March 2026</p>
+</div>
+<!-- Slide 2: Executive Summary -->
+<div class="ppt-slide">
+<h2>Executive Summary</h2>
+<div class="two-column">
+<div>
+<h3>Mission</h3>
+<p>Detect small, persistent statistical edges (0.5–3% annualized alpha) while preserving capital through robust risk management.</p>
+<div class="highlight-box">
+<strong>Core Philosophy:</strong> Survival first, compounding second. Edge detection is optional; survival is non-negotiable.
+</div>
+</div>
+<div>
+<h3>Key Differentiators</h3>
+<ul>
+<li>Sub-50ms signal computation latency</li>
+<li>Mathematical risk framework (Kelly, CPPI, Monte Carlo)</li>
+<li>Human-in-the-loop execution mandate</li>
+<li>Immutable audit trails for compliance</li>
+<li>Walk-forward validation prevents overfitting</li>
+</ul>
+</div>
+</div>
+<div class="metric-grid">
+<div class="metric-card">
+<div class="metric-value">45ms</div>
+<div class="metric-label">Signal Path Latency</div>
+</div>
+<div class="metric-card">
+<div class="metric-value">0.5%</div>
+<div class="metric-label">Default Risk/Trade</div>
+</div>
+<div class="metric-card">
+<div class="metric-value">99.9%</div>
+<div class="metric-label">Uptime Target</div>
+</div>
+</div>
+<div class="footer">
+<span>AI Trading System</span>
+<span>2 / 12</span>
+</div>
+</div>
+<!-- Slide 3: System Architecture -->
+<div class="ppt-slide">
+<h2>System Architecture</h2>
+<div class="architecture-diagram">
+<div class="layer layer-data">
+<div class="component" style="background: #3498db;">Market Data</div>
+<div class="component" style="background: #3498db;">Broker Feeds</div>
+<div class="component" style="background: #3498db;">Macro APIs</div>
+<div class="component" style="background: #3498db;">Alternative Data</div>
+</div>
+<div class="layer layer-ingestion">
+<div class="component" style="background: #9b59b6;">Ingestion Layer</div>
+<div class="component" style="background: #9b59b6;">Data Quality</div>
+<div class="component" style="background: #9b59b6;">Kafka/Kinesis</div>
+</div>
+<div class="layer layer-feature">
+<div class="component" style="background: #e74c3c;">Feature Store</div>
+<div class="component" style="background: #e74c3c;">Feature Engineering</div>
+<div class="component" style="background: #e74c3c;">Model Registry</div>
+</div>
+<div class="layer layer-signal">
+<div class="component" style="background: #f39c12;">Signal Engine</div>
+<div class="component" style="background: #f39c12;">ML Models</div>
+<div class="component" style="background: #f39c12;">Ensemble</div>
+</div>
+<div class="layer layer-risk">
+<div class="component" style="background: #e67e22;">Risk Engine</div>
+<div class="component" style="background: #e67e22;">Portfolio Heat</div>
+<div class="component" style="background: #e67e22;">Circuit Breakers</div>
+</div>
+<div class="layer layer-execution">
+<div class="component" style="background: #27ae60;">Execution Layer</div>
+<div class="component" style="background: #27ae60;">Broker APIs</div>
+</div>
+</div>
+<div class="footer">
+<span>AI Trading System</span>
+<span>3 / 12</span>
+</div>
+</div>
+<!-- Slide 4: Signal Generation -->
+<div class="ppt-slide">
+<h2>Signal Generation Layer</h2>
+<div class="two-column">
+<div>
+<h3>Signal Families</h3>
+<ul>
+<li><strong>Momentum:</strong> Time-series &amp; cross-sectional</li>
+<li><strong>Mean Reversion:</strong> Bollinger, micro-reversion</li>
+<li><strong>Statistical Arbitrage:</strong> Cointegrated pairs</li>
+<li><strong>Volatility:</strong> GARCH forecasts, IV-RV</li>
+<li><strong>Sentiment:</strong> NLP embeddings</li>
+<li><strong>Regime Detection:</strong> HMM clustering</li>
+</ul>
+</div>
+<div>
+<h3>Ensemble Methods</h3>
+<ul>
+<li>Confidence-weighted averaging</li>
+<li>Bayesian model averaging</li>
+<li>Stacking with meta-learner</li>
+<li>Majority voting</li>
+</ul>
+<div class="highlight-box">
+<strong>Signal Decay:</strong> wₜ = e^(-λΔt) where t₁/₂ = ln(2)/λ
+                </div>
+</div>
+</div>
+<div class="footer">
+<span>AI Trading System</span>
+<span>4 / 12</span>
+</div>
+</div>
+<!-- Slide 5: Risk Management -->
+<div class="ppt-slide">
+<h2>Risk Management Framework</h2>
+<div class="risk-matrix">
+<div class="risk-item">
+<h4>Position Sizing</h4>
+<p>Fixed Fractional, Kelly Criterion (Quarter-Kelly), Volatility Targeting, CPPI, ATR-based</p>
+</div>
+<div class="risk-item">
+<h4>Portfolio Heat</h4>
+<p>H = √(rᵀΣr) — Correlation-adjusted risk aggregation with VaR and Expected Shortfall</p>
+</div>
+<div class="risk-item">
+<h4>Circuit Breakers</h4>
+<p>-5% daily → -20% monthly → -30% quarterly halt with mandatory review</p>
+</div>
+<div class="risk-item">
+<h4>Monte Carlo</h4>
+<p>Ruin probability estimation with block bootstrap for serial correlation</p>
+</div>
+</div>
+<div class="highlight-box" style="margin-top: 30px;">
+<strong>Recovery Mathematics:</strong> For drawdown D, required recovery G = D/(1-D). A 20% drawdown requires 25% gain; 50% drawdown requires 100% gain.
+        </div>
+<div class="footer">
+<span>AI Trading System</span>
+<span>5 / 12</span>
+</div>
+</div>
+<!-- Slide 6: Backtesting Framework -->
+<div class="ppt-slide">
+<h2>Backtesting &amp; Validation</h2>
+<div class="two-column">
+<div>
+<h3>Walk-Forward Optimization</h3>
+<ul>
+<li>Rolling/expanding windows</li>
+<li>Locked forward tests</li>
+<li>Parameter stability analysis</li>
+<li>Prevents lookahead bias</li>
+</ul>
+<h3>Realistic Assumptions</h3>
+<ul>
+<li>Slippage: 1 tick + volatility</li>
+<li>Commissions: 10 bps</li>
+<li>Market impact modeling</li>
+<li>Borrow costs for shorts</li>
+</ul>
+</div>
+<div>
+<h3>Key Metrics</h3>
+<ul>
+<li>Sharpe &amp; Sortino ratios</li>
+<li>Max Drawdown &amp; Calmar</li>
+<li>Profit Factor</li>
+<li>Expectancy per trade</li>
+<li>Tail ratio</li>
+<li>Common Sense Ratio</li>
+</ul>
+<div class="highlight-box">
+<strong>Why Win Rate Misleads:</strong> 90% win with 1:10 payoff = negative expectancy. 30% win with 3:1 payoff = positive expectancy.
+                </div>
+</div>
+</div>
+<div class="footer">
+<span>AI Trading System</span>
+<span>6 / 12</span>
+</div>
+</div>
+<!-- Slide 7: Technology Stack -->
+<div class="ppt-slide">
+<h2>Technology Stack</h2>
+<div class="two-column">
+<div>
+<h3>Core Technologies</h3>
+<table style="width: 100%; font-size: 18px; color: #e0e0e0;">
+<tr>
+<td style="padding: 10px; color: #feca57;"><strong>Language</strong></td>
+<td>Python 3.11+</td>
+</tr>
+<tr>
+<td style="padding: 10px; color: #feca57;"><strong>Data</strong></td>
+<td>Pandas, Polars, Spark</td>
+</tr>
+<tr>
+<td style="padding: 10px; color: #feca57;"><strong>ML</strong></td>
+<td>XGBoost, LightGBM, PyTorch</td>
+</tr>
+<tr>
+<td style="padding: 10px; color: #feca57;"><strong>Database</strong></td>
+<td>TimescaleDB, PostgreSQL, Redis</td>
+</tr>
+<tr>
+<td style="padding: 10px; color: #feca57;"><strong>Queue</strong></td>
+<td>Kafka/Kinesis</td>
+</tr>
+</table>
+</div>
+<div>
+<h3>Infrastructure</h3>
+<table style="width: 100%; font-size: 18px; color: #e0e0e0;">
+<tr>
+<td style="padding: 10px; color: #feca57;"><strong>Cloud</strong></td>
+<td>AWS (Primary)</td>
+</tr>
+<tr>
+<td style="padding: 10px; color: #feca57;"><strong>Compute</strong></td>
+<td>ECS/EKS, Lambda</td>
+</tr>
+<tr>
+<td style="padding: 10px; color: #feca57;"><strong>Storage</strong></td>
+<td>S3, EBS</td>
+</tr>
+<tr>
+<td style="padding: 10px; color: #feca57;"><strong>Monitoring</strong></td>
+<td>Prometheus, Grafana</td>
+</tr>
+<tr>
+<td style="padding: 10px; color: #feca57;"><strong>Security</strong></td>
+<td>KMS, IAM, GuardDuty</td>
+</tr>
+</table>
+</div>
+</div>
+<div class="footer">
+<span>AI Trading System</span>
+<span>7 / 12</span>
+</div>
+</div>
+<!-- Slide 8: Latency Budget -->
+<div class="ppt-slide">
+<h2>Latency Budget</h2>
+<table style="width: 100%; font-size: 20px; color: #e0e0e0; margin-top: 30px;">
+<thead>
+<tr style="background: rgba(233, 69, 96, 0.2);">
+<th style="padding: 20px; text-align: left;">Component</th>
+<th style="padding: 20px; text-align: right;">Budget (ms)</th>
+</tr>
+</thead>
+<tbody>
+<tr style="border-bottom: 1px solid rgba(255,255,255,0.1);">
+<td style="padding: 18px;">Ingestion decode + validation</td>
+<td style="padding: 18px; text-align: right; color: #feca57; font-weight: 600;">8</td>
+</tr>
+<tr style="border-bottom: 1px solid rgba(255,255,255,0.1);">
+<td style="padding: 18px;">Feature retrieval/compute</td>
+<td style="padding: 18px; text-align: right; color: #feca57; font-weight: 600;">12</td>
+</tr>
+<tr style="border-bottom: 1px solid rgba(255,255,255,0.1);">
+<td style="padding: 18px;">Signal inference + ensemble</td>
+<td style="padding: 18px; text-align: right; color: #feca57; font-weight: 600;">10</td>
+</tr>
+<tr style="border-bottom: 1px solid rgba(255,255,255,0.1);">
+<td style="padding: 18px;">Risk checks + sizing</td>
+<td style="padding: 18px; text-align: right; color: #feca57; font-weight: 600;">8</td>
+</tr>
+<tr style="border-bottom: 1px solid rgba(255,255,255,0.1);">
+<td style="padding: 18px;">Order assembly + dispatch</td>
+<td style="padding: 18px; text-align: right; color: #feca57; font-weight: 600;">7</td>
+</tr>
+<tr style="background: rgba(233, 69, 96, 0.3);">
+<td style="padding: 20px; font-weight: 700;">Total</td>
+<td style="padding: 20px; text-align: right; color: #e94560; font-weight: 800; font-size: 28px;">45ms</td>
+</tr>
+</tbody>
+</table>
+<div class="highlight-box" style="margin-top: 40px;">
+<strong>Note:</strong> 45ms target excludes broker venue latency. Network optimization and co-location can further reduce end-to-end latency.
+        </div>
+<div class="footer">
+<span>AI Trading System</span>
+<span>8 / 12</span>
+</div>
+</div>
+<!-- Slide 9: Implementation Roadmap -->
+<div class="ppt-slide">
+<h2>Implementation Roadmap</h2>
+<div class="roadmap">
+<div class="roadmap-phase">
+<div class="phase-number">1</div>
+<div class="phase-title">Months 1-2</div>
+<div class="phase-desc">Local research, backtesting prototypes, risk model development</div>
+</div>
+<div class="roadmap-phase">
+<div class="phase-number">2</div>
+<div class="phase-title">Months 3-4</div>
+<div class="phase-desc">Paper trading integration, latency profiling, infrastructure setup</div>
+</div>
+<div class="roadmap-phase">
+<div class="phase-number">3</div>
+<div class="phase-title">Months 5-6</div>
+<div class="phase-desc">Micro-live deployment with tight limits, monitoring validation</div>
+</div>
+<div class="roadmap-phase">
+<div class="phase-number">4</div>
+<div class="phase-title">Months 7-12</div>
+<div class="phase-desc">Controlled scaling tied to risk-adjusted KPIs</div>
+</div>
+<div class="roadmap-phase">
+<div class="phase-number">5</div>
+<div class="phase-title">Year 2+</div>
+<div class="phase-desc">Full deployment, active-active redundancy, institutional controls</div>
+</div>
+</div>
+<div class="highlight-box" style="margin-top: 50px;">
+<strong>Capital Scaling Policy:</strong> Months 0-6: $5k-$25k at 0.5% risk/trade. Scale only with positive expectancy and MDD &lt; 10%. Never exceed 2% risk/trade.
+        </div>
+<div class="footer">
+<span>AI Trading System</span>
+<span>9 / 12</span>
+</div>
+</div>
+<!-- Slide 10: Safety Controls -->
+<div class="ppt-slide">
+<h2>Safety Controls &amp; Guardrails</h2>
+<div class="two-column">
+<div>
+<h3>Behavioral Safeguards</h3>
+<ul>
+<li>Cooling-off after consecutive losses</li>
+<li>Anti-revenge throttle</li>
+<li>Mandatory review tickets</li>
+<li>No discretionary override of hard limits</li>
+</ul>
+<h3>Exposure Throttling</h3>
+<ul>
+<li>-5% drawdown → 50% size cut</li>
+<li>-10% drawdown → 75% size cut</li>
+<li>-15% drawdown → halt new risk</li>
+<li>-20% monthly → full shutdown</li>
+</ul>
+</div>
+<div>
+<h3>Operational Governance</h3>
+<ul>
+<li>Immutable timestamped logs</li>
+<li>Drift detection (PSI, KS tests)</li>
+<li>Microsecond time sync</li>
+<li>Signed audit artifacts</li>
+</ul>
+<div class="highlight-box">
+<strong>Human-in-the-Loop Mandate:</strong> No auto-execution. System produces hypotheses with invalidation logic. Humans approve/reject with recorded rationale.
+                </div>
+</div>
+</div>
+<div class="footer">
+<span>AI Trading System</span>
+<span>10 / 12</span>
+</div>
+</div>
+<!-- Slide 11: Key Metrics & Success Criteria -->
+<div class="ppt-slide">
+<h2>Success Criteria</h2>
+<div class="metric-grid" style="grid-template-columns: repeat(4, 1fr);">
+<div class="metric-card">
+<div class="metric-value">&gt;1.0</div>
+<div class="metric-label">Target Sharpe</div>
+</div>
+<div class="metric-card">
+<div class="metric-value">&lt;15%</div>
+<div class="metric-label">Max Drawdown</div>
+</div>
+<div class="metric-card">
+<div class="metric-value">&gt;0.5%</div>
+<div class="metric-label">Net Alpha Target</div>
+</div>
+<div class="metric-card">
+<div class="metric-value">&gt;0.5</div>
+<div class="metric-label">Profit Factor</div>
+</div>
+</div>
+<div class="two-column" style="margin-top: 40px;">
+<div class="highlight-box">
+<h3 style="color: #feca57; margin-bottom: 15px;">Risk Metrics</h3>
+<ul style="font-size: 18px;">
+<li>Portfolio heat &lt; 15%</li>
+<li>Single position &lt; 10%</li>
+<li>Sector exposure &lt; 25%</li>
+<li>Correlation stress trigger &gt; 0.7</li>
+</ul>
+</div>
+<div class="highlight-box">
+<h3 style="color: #feca57; margin-bottom: 15px;">Operational Metrics</h3>
+<ul style="font-size: 18px;">
+<li>Signal latency &lt; 50ms</li>
+<li>System uptime &gt; 99.9%</li>
+<li>Data freshness &lt; 100ms</li>
+<li>Order fill rate &gt; 99%</li>
+</ul>
+</div>
+</div>
+<div class="footer">
+<span>AI Trading System</span>
+<span>11 / 12</span>
+</div>
+</div>
+<!-- Slide 12: Conclusion -->
+<div class="ppt-slide title-slide">
+<h2 style="font-size: 56px; margin-bottom: 40px;">Conclusion</h2>
+<div style="max-width: 900px;">
+<p style="font-size: 26px; line-height: 2; margin-bottom: 40px;">
+                This architecture targets <strong style="color: #e94560;">probabilistic expected value</strong>, not guaranteed outcomes. Expected alpha is modest and fragile; costs, slippage, and correlation spikes can erase gross edge.
+            </p>
+<p style="font-size: 26px; line-height: 2; margin-bottom: 40px;">
+                Long-run success depends on <strong style="color: #feca57;">preserving capital through adverse regimes</strong> so compounding can continue.
+            </p>
+<div class="highlight-box" style="margin-top: 50px;">
+<p style="font-size: 22px; font-style: italic; text-align: center;">
+                    "Edge detection is optional without robust risk controls; survival is non-negotiable."
+                </p>
+</div>
+</div>
+<div class="footer">
+<span>AI Trading System</span>
+<span>12 / 12</span>
+</div>
+</div>
+</body>
+</html>

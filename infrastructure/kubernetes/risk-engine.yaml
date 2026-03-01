@@ -1,0 +1,173 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: risk-engine
+  namespace: ai-trading
+  labels:
+    app: risk-engine
+    component: trading
+spec:
+  replicas: 2
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+  selector:
+    matchLabels:
+      app: risk-engine
+  template:
+    metadata:
+      labels:
+        app: risk-engine
+        component: trading
+    spec:
+      serviceAccountName: ai-trading-sa
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        fsGroup: 1000
+      containers:
+      - name: risk-engine
+        image: ai-trading/risk-engine:latest
+        imagePullPolicy: Always
+        ports:
+        - name: http
+          containerPort: 8080
+          protocol: TCP
+        - name: metrics
+          containerPort: 9090
+          protocol: TCP
+        env:
+        - name: KAFKA_BROKERS
+          valueFrom:
+            secretKeyRef:
+              name: ai-trading-secrets
+              key: kafka-brokers
+        - name: REDIS_URL
+          valueFrom:
+            secretKeyRef:
+              name: ai-trading-secrets
+              key: redis-url
+        - name: DB_URL
+          valueFrom:
+            secretKeyRef:
+              name: ai-trading-secrets
+              key: db-url
+        - name: LOG_LEVEL
+          value: "INFO"
+        - name: ENVIRONMENT
+          value: "production"
+        resources:
+          requests:
+            cpu: "500m"
+            memory: "1Gi"
+          limits:
+            cpu: "2000m"
+            memory: "4Gi"
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: http
+          initialDelaySeconds: 30
+          periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 3
+        readinessProbe:
+          httpGet:
+            path: /ready
+            port: http
+          initialDelaySeconds: 10
+          periodSeconds: 5
+          timeoutSeconds: 3
+          failureThreshold: 3
+        volumeMounts:
+        - name: config
+          mountPath: /app/config
+          readOnly: true
+        - name: tmp
+          mountPath: /tmp
+      volumes:
+      - name: config
+        configMap:
+          name: risk-engine-config
+      - name: tmp
+        emptyDir: {}
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+          - weight: 100
+            podAffinityTerm:
+              labelSelector:
+                matchExpressions:
+                - key: app
+                  operator: In
+                  values:
+                  - risk-engine
+              topologyKey: kubernetes.io/hostname
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: risk-engine
+  namespace: ai-trading
+  labels:
+    app: risk-engine
+spec:
+  type: ClusterIP
+  ports:
+  - name: http
+    port: 8080
+    targetPort: http
+    protocol: TCP
+  - name: metrics
+    port: 9090
+    targetPort: metrics
+    protocol: TCP
+  selector:
+    app: risk-engine
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: risk-engine-config
+  namespace: ai-trading
+data:
+  config.yaml: |
+    risk:
+      max_risk_per_trade: 0.02
+      default_risk_per_trade: 0.005
+      max_single_position: 0.10
+      max_sector_exposure: 0.25
+      max_portfolio_heat: 0.15
+      max_total_positions: 20
+    
+    drawdown_controls:
+      daily_loss_limit: 0.05
+      monthly_loss_limit: 0.20
+      quarterly_loss_limit: 0.30
+      drawdown_5pct_action: cut_50
+      drawdown_10pct_action: cut_75
+      drawdown_15pct_action: halt
+    
+    position_sizing:
+      default_method: fixed_fractional
+      kelly_fraction: 0.25
+      target_volatility: 0.10
+      cppi_floor_fraction: 0.90
+      cppi_multiplier: 3.0
+    
+    circuit_breakers:
+      correlation_threshold: 0.70
+      vol_stress_multiplier: 1.5
+    
+    kafka:
+      topics:
+        signals_scored: signals.scored
+        risk_decisions: risk.decisions
+        orders_outbound: orders.outbound
+      consumer_group: risk-engine
+    
+    monte_carlo:
+      n_sims: 20000
+      ruin_threshold: 0.20

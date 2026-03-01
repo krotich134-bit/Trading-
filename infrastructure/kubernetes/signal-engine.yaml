@@ -1,0 +1,183 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: signal-engine
+  namespace: ai-trading
+  labels:
+    app: signal-engine
+    component: trading
+spec:
+  replicas: 3
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+  selector:
+    matchLabels:
+      app: signal-engine
+  template:
+    metadata:
+      labels:
+        app: signal-engine
+        component: trading
+    spec:
+      serviceAccountName: ai-trading-sa
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        fsGroup: 1000
+      containers:
+      - name: signal-engine
+        image: ai-trading/signal-engine:latest
+        imagePullPolicy: Always
+        ports:
+        - name: http
+          containerPort: 8080
+          protocol: TCP
+        - name: metrics
+          containerPort: 9090
+          protocol: TCP
+        env:
+        - name: KAFKA_BROKERS
+          valueFrom:
+            secretKeyRef:
+              name: ai-trading-secrets
+              key: kafka-brokers
+        - name: REDIS_URL
+          valueFrom:
+            secretKeyRef:
+              name: ai-trading-secrets
+              key: redis-url
+        - name: DB_URL
+          valueFrom:
+            secretKeyRef:
+              name: ai-trading-secrets
+              key: db-url
+        - name: LOG_LEVEL
+          value: "INFO"
+        - name: ENVIRONMENT
+          value: "production"
+        resources:
+          requests:
+            cpu: "500m"
+            memory: "1Gi"
+          limits:
+            cpu: "2000m"
+            memory: "4Gi"
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: http
+          initialDelaySeconds: 30
+          periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 3
+        readinessProbe:
+          httpGet:
+            path: /ready
+            port: http
+          initialDelaySeconds: 10
+          periodSeconds: 5
+          timeoutSeconds: 3
+          failureThreshold: 3
+        volumeMounts:
+        - name: config
+          mountPath: /app/config
+          readOnly: true
+        - name: tmp
+          mountPath: /tmp
+      volumes:
+      - name: config
+        configMap:
+          name: signal-engine-config
+      - name: tmp
+        emptyDir: {}
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+          - weight: 100
+            podAffinityTerm:
+              labelSelector:
+                matchExpressions:
+                - key: app
+                  operator: In
+                  values:
+                  - signal-engine
+              topologyKey: kubernetes.io/hostname
+      topologySpreadConstraints:
+      - maxSkew: 1
+        topologyKey: topology.kubernetes.io/zone
+        whenUnsatisfiable: ScheduleAnyway
+        labelSelector:
+          matchLabels:
+            app: signal-engine
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: signal-engine
+  namespace: ai-trading
+  labels:
+    app: signal-engine
+spec:
+  type: ClusterIP
+  ports:
+  - name: http
+    port: 8080
+    targetPort: http
+    protocol: TCP
+  - name: metrics
+    port: 9090
+    targetPort: metrics
+    protocol: TCP
+  selector:
+    app: signal-engine
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: signal-engine-config
+  namespace: ai-trading
+data:
+  config.yaml: |
+    signal:
+      confidence_threshold: 0.6
+      half_life_seconds: 3600
+      max_signals_per_minute: 100
+    
+    strategies:
+      momentum:
+        enabled: true
+        lookback_periods: [20, 60, 120]
+        adx_threshold: 25
+      
+      mean_reversion:
+        enabled: true
+        lookback: 20
+        entry_zscore: 2.0
+        hurst_threshold: 0.4
+      
+      stat_arb:
+        enabled: true
+        lookback: 60
+        coint_pvalue: 0.05
+      
+      volatility:
+        enabled: true
+        vol_percentile_threshold: 80
+    
+    ensemble:
+      method: confidence_weighted
+      min_confidence: 0.5
+    
+    kafka:
+      topics:
+        ticks_cleaned: ticks.cleaned
+        features_live: features.live
+        signals_scored: signals.scored
+      consumer_group: signal-engine
+    
+    metrics:
+      enabled: true
+      port: 9090

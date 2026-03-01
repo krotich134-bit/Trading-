@@ -1,0 +1,35 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: ai-trading
+  labels:
+    name: ai-trading
+    environment: production
+---
+apiVersion: v1
+kind: ResourceQuota
+metadata:
+  name: ai-trading-quota
+  namespace: ai-trading
+spec:
+  hard:
+    requests.cpu: "20"
+    requests.memory: 64Gi
+    limits.cpu: "40"
+    limits.memory: 128Gi
+    pods: "50"
+---
+apiVersion: v1
+kind: LimitRange
+metadata:
+  name: ai-trading-limits
+  namespace: ai-trading
+spec:
+  limits:
+  - default:
+      cpu: "1"
+      memory: 2Gi
+    defaultRequest:
+      cpu: "100m"
+      memory: 256Mi
+    type: Container
